@@ -1,0 +1,224 @@
+@charset "utf-8";
+
+
+.long-shadow {
+  display: inline-block;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  padding: 10px;
+  border: none;
+  font: normal 60px/1 "Fredoka One", Helvetica, sans-serif;
+  color: rgba(255,255,255,1);
+  text-align: center;
+  -o-text-overflow: clip;
+  text-overflow: clip;
+  text-shadow: 3px 3px 0 #b71c1c , 4px 4px 0 #b71c1c , 5px 5px 0 #b71c1c , 6px 6px 0 #b71c1c , 7px 7px 0 #b71c1c , 8px 8px 0 #b71c1c , 9px 9px 0 #b71c1c , 10px 10px 0 #b71c1c , 11px 11px 0 #b71c1c , 12px 12px 0 #b71c1c , 13px 13px 0 #b71c1c , 14px 14px 0 #b71c1c , 15px 15px 0 #b71c1c , 16px 16px 0 #b71c1c , 17px 17px 0 #b71c1c , 18px 18px 0 #b71c1c , 19px 19px 0 #b71c1c , 20px 20px 0 #b71c1c;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.container-fluid {
+    max-width: 100%;
+}
+
+.login:before {
+  content: "";
+  position: fixed;
+  left: -10px;
+  right: -10px;
+  z-index: -1;
+  
+  display: block;
+  background: url('../img/background.jpg');
+  width: 110%;
+  height: 100%;
+  
+  -webkit-filter: blur(5px);
+  -moz-filter: blur(5px);
+  -o-filter: blur(5px);
+  -ms-filter: blur(5px);
+  filter: blur(5px) brightness(0.5);
+}
+
+
+.no-padding {
+    padding: 0;
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.heading {
+    background-color: #d32f2f;
+    color: white;
+    display: block;
+    font-weight: bold;
+    border-bottom: 4px solid #b71c1c;
+    padding: 1rem 4rem 2rem;
+}
+
+.form-signin {
+    max-width: 500px;
+    padding: 19px 29px 29px;
+    margin: 0 auto;
+    background-color: #f3f3f3;
+    margin-top: 50px;
+}
+
+.form-signin input[type="text"],
+.form-signin input[type="password"],
+.form-signin input[type="email"] {
+    font-size: 16px;
+    height: 45px;
+    padding: 7px 9px;
+}
+
+
+#btn-login {
+    background-color: #b71c1c;
+    color: white;
+}
+
+.profile, .home {
+    background-color: #141414;
+    color: white;
+}
+
+.profile-card {
+    display: inline-block;
+    margin: 0 1rem;
+    color: #333;
+}
+
+.avatar {
+    background-color: #d32f2f;
+    color: white;
+    cursor: pointer;
+    border: 3px solid #333;
+    box-sizing: border-box;
+}
+
+.avatar:hover {
+    border-color: white;
+}
+
+.avatar > span {
+    vertical-align: bottom;
+    font-size: 15rem;
+}
+
+.profile-card:hover {
+    color: white;
+}
+
+.heading.no-bg {
+    background-color: transparent;
+    border-bottom: 0 none;
+}
+
+.heading.suddle-bg {
+    background-color: rgba(51, 51, 51, 0.3);
+    transition: 0.3s;
+    border-bottom: 0 none;
+}
+
+.heading.suddle-bg:hover {
+    background-color: rgba(51, 51, 51, 1);
+}
+
+.user-nav {
+    padding: 2rem;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.user-nav:hover{
+    color: white;
+    transition: 0.2s;
+}
+
+.user-nav > h3 {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+.user-nav > .avatar {
+    display: inline-block;
+    margin-right: 2rem;
+}
+
+.user-nav > .avatar > span {
+    font-size: 3rem;
+}
+
+.body-container {
+    padding: 110px 4rem;
+}
+
+.category {
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.category::-webkit-scrollbar {
+    height: 5px;
+}
+ 
+.category::-webkit-scrollbar-track {
+    border-radius: 10px;
+}
+ 
+.category::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: #d32f2f;
+}
+
+.category > .film {
+    width: 300px;
+    height: 200px;
+    display: inline-block;
+    cursor: pointer;
+    padding: 1rem;
+    margin: 0 0.5rem;
+    transition: 0.3s;
+    position: relative;
+    vertical-align: middle;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    white-space: normal;
+}
+
+.category > .film:hover {
+    width: 450px;
+    height: 250px;
+}
+
+.film > .info {
+    font-weight: bolder;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 1s linear;
+    position: absolute;
+    bottom: 1rem;
+    text-shadow: 1px 1px #555;
+    font-size: 1.7rem;
+    padding: 1rem;
+    width: 430px;
+}
+
+.film:hover > .info {
+    visibility: visible;
+    opacity: 1;
+}
+
+.calification {
+    color: #d32f2f;
+    display: inline-block;
+}

@@ -65,4 +65,14 @@ $('document').ready(function()
 			window.location.href = "home.php?profile_id=" + clickedBtnID; 
 		});
 
+		$(".chevron-container").click(function () {
+			$('.info-container').css('height','auto');
+			$('.film-detail').css('height','0px');
+			$('.film-detail').css('visibility','hidden');
+			var clickedBtnID = $(this).attr('id');
+			$("#"+clickedBtnID+".film-detail").css('height','300px');
+			$("#"+clickedBtnID+".film-detail").css('visibility','visible');
+
+		});
+
 });

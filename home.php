@@ -29,9 +29,22 @@ $stmt->execute();
 $result=$stmt->fetchAll();
 
 //user film list
-$stmt = $db_con->prepare("SELECT metraje.* from lista, perfil, metraje WHERE lista.id_perfil=perfil.id_perfil and perfil.id_perfil=:pid group by id_metraje;");
-$stmt->execute(array(":pid"=>$_SESSION['profile_id']));
+$stmt = $db_con->prepare("SELECT metraje.* from lista, perfil, metraje, usuario WHERE usuario.id_usuario=:uid and perfil.id_perfil=lista.id_perfil and lista.id_metraje=metraje.id_metraje and perfil.id_perfil = :pid;");
+$stmt->execute(array(":uid"=>$_SESSION['user_session'], ":pid"=>$_SESSION['profile_id']));
 $list=$stmt->fetchAll();
+
+//history
+$stmt = $db_con->prepare("SELECT metraje.* from perfil,historial,historial_pelicula,pelicula,metraje,usuario where perfil.id_perfil=historial.id_perfil and historial.id_historial=historial_pelicula.id_historial and Historial_pelicula.id_pelicula=pelicula.id_metraje and metraje.id_metraje=pelicula.id_metraje and perfil.id_perfil=:pid and usuario.id_usuario=:uid;");
+$stmt->execute(array(":uid"=>$_SESSION['user_session'], ":pid"=>$_SESSION['profile_id']));
+$history_movies=$stmt->fetchAll();
+
+$stmt = $db_con->prepare("SELECT metraje.*, max(capitulo.id_capitulo) as 'capid', capitulo.nombre as 'nombrecap', capitulo.descripcion as 'descap' from perfil,historial,Historial_serie,serie,metraje,temporada,capitulo,usuario where perfil.id_perfil=historial.id_perfil and historial.id_historial=Historial_serie.id_historial and Historial_serie.id_serie=serie.id_metraje and serie.id_metraje=metraje.id_metraje and Historial_serie.id_temporada=Temporada.id_temporada and Historial_serie.id_capitulo=Capitulo.id_capitulo and perfil.id_perfil=:pid and usuario.id_usuario=:uid;");
+$stmt->execute(array(":uid"=>$_SESSION['user_session'], ":pid"=>$_SESSION['profile_id']));
+$history_series=$stmt->fetchAll();
+
+$history=array_merge($history_movies, $history_series);
+
+
 
 ?>
 <!DOCTYPE html>
@@ -77,44 +90,128 @@ $list=$stmt->fetchAll();
 			<div class="col-xs-12 col-sm-12">
 					<div class="body-container">
 					<div class="category">
-						<h3>Mi lista</h3>							
-							<?php foreach($list as $film): ?>
-								<?php
-									$stmt = $db_con->prepare("SELECT nombre FROM genero WHERE id_genero=:gid");
-									$stmt->execute(array(":gid"=>$film['id_genero']));
-									$genero = $stmt->fetch(PDO::FETCH_ASSOC);
+					<h3>Continuar viendo</h3>							
+						<?php foreach($history as $film): ?>
+							<?php
+								$stmt = $db_con->prepare("SELECT nombre FROM genero WHERE id_genero=:gid");
+								$stmt->execute(array(":gid"=>$film['id_genero']));
+								$genero = $stmt->fetch(PDO::FETCH_ASSOC);
 
-									$stmt = $db_con->prepare("SELECT nombre FROM director WHERE id_director=:did");
-									$stmt->execute(array(":did"=>$film['id_director']));
-									$director = $stmt->fetch(PDO::FETCH_ASSOC);
+								$stmt = $db_con->prepare("SELECT nombre FROM director WHERE id_director=:did");
+								$stmt->execute(array(":did"=>$film['id_director']));
+								$director = $stmt->fetch(PDO::FETCH_ASSOC);
 
-									$stmt = $db_con->prepare("SELECT * FROM pelicula WHERE id_metraje=:mid");
+								$stmt = $db_con->prepare("SELECT * FROM pelicula WHERE id_metraje=:mid");
+								$stmt->execute(array(":mid"=>$film['id_metraje']));
+								$film_type = $stmt->fetch(PDO::FETCH_ASSOC);
+
+								if($film_type=="") {
+									$stmt = $db_con->prepare("SELECT * FROM serie WHERE id_metraje=:mid");
 									$stmt->execute(array(":mid"=>$film['id_metraje']));
 									$film_type = $stmt->fetch(PDO::FETCH_ASSOC);
+								}
 
-									if($film_type=="") {
-										$stmt = $db_con->prepare("SELECT * FROM serie WHERE id_metraje=:mid");
-										$stmt->execute(array(":mid"=>$film['id_metraje']));
-										$film_type = $stmt->fetch(PDO::FETCH_ASSOC);
-									}
+								$date = date_parse($film['fecha']);
 
-									$date = date_parse($film['fecha']);
-
-								?>
-								<div class="film" style="background-image: url('<?php echo htmlspecialchars($film_type["imagen"]) ?>');">
-									<div class="info">
-										<h3><strong><?= $film['nombre'] ?></strong></h3>
-										<div class="calification">
-										<?php for($i = $film["puntuacion"]; $i>0; $i--): ?>
-											<span class="glyphicon glyphicon-star"></span>
-										<?php endfor ?>
-										</div>
-										<span><?= $date['year'] ?></span><br>
-										<span><?= $film['descripcion'] ?></span>
+							?>
+							<div class="film" style="background-image: url('<?php echo htmlspecialchars($film_type["imagen"]) ?>');">
+								<div class="info">
+									<h3><strong><?= isset($film['nombrecap']) ? $film['nombrecap'] : $film['nombre'] ?></strong></h3>
+									<div class="calification">
+									<?php for($i = $film["puntuacion"]; $i>0; $i--): ?>
+										<span class="glyphicon glyphicon-star"></span>
+									<?php endfor ?>
+									</div>
+									<span><?= $date['year'] ?></span><br>
+									<span><?= isset($film['descap']) ? $film['descap'] : $film['descripcion'] ?></span>
+									<div class="chevron-container" id='<?php echo htmlspecialchars($film["id_metraje"]) ?>'>
+										<span class="glyphicon glyphicon-chevron-down movie-chevron"></span>										
 									</div>
 								</div>
-							<?php endforeach?>
-						</div>
+							</div>
+						<?php endforeach?>
+					</div>
+					<div class="category">
+						<h3>Mi lista</h3>							
+						<?php foreach($list as $film): ?>
+							<?php
+								$stmt = $db_con->prepare("SELECT nombre FROM genero WHERE id_genero=:gid");
+								$stmt->execute(array(":gid"=>$film['id_genero']));
+								$genero = $stmt->fetch(PDO::FETCH_ASSOC);
+
+								$stmt = $db_con->prepare("SELECT nombre FROM director WHERE id_director=:did");
+								$stmt->execute(array(":did"=>$film['id_director']));
+								$director = $stmt->fetch(PDO::FETCH_ASSOC);
+
+								$stmt = $db_con->prepare("SELECT * FROM pelicula WHERE id_metraje=:mid");
+								$stmt->execute(array(":mid"=>$film['id_metraje']));
+								$film_type = $stmt->fetch(PDO::FETCH_ASSOC);
+
+								if($film_type=="") {
+									$stmt = $db_con->prepare("SELECT * FROM serie WHERE id_metraje=:mid");
+									$stmt->execute(array(":mid"=>$film['id_metraje']));
+									$film_type = $stmt->fetch(PDO::FETCH_ASSOC);
+								}
+
+								$date = date_parse($film['fecha']);
+
+							?>
+							<div class="film" style="background-image: url('<?php echo htmlspecialchars($film_type["imagen"]) ?>');">
+								<div class="info">
+									<h3><strong><?= $film['nombre'] ?></strong></h3>
+									<div class="calification">
+									<?php for($i = $film["puntuacion"]; $i>0; $i--): ?>
+										<span class="glyphicon glyphicon-star"></span>
+									<?php endfor ?>
+									</div>
+									<span><?= $date['year'] ?></span><br>
+									<span><?= $film['descripcion'] ?></span>
+									<div class="chevron-container" id='<?php echo 'lista'.htmlspecialchars($film["id_metraje"]) ?>'>
+										<span class="glyphicon glyphicon-chevron-down movie-chevron"></span>										
+									</div>
+								</div>
+							</div>
+						<?php endforeach?>
+					</div>
+					<div class="info-container">
+						<?php foreach($list as $film): ?>
+							<?php
+								$stmt = $db_con->prepare("SELECT nombre FROM genero WHERE id_genero=:gid");
+								$stmt->execute(array(":gid"=>$film['id_genero']));
+								$genero = $stmt->fetch(PDO::FETCH_ASSOC);
+
+								$stmt = $db_con->prepare("SELECT nombre FROM director WHERE id_director=:did");
+								$stmt->execute(array(":did"=>$film['id_director']));
+								$director = $stmt->fetch(PDO::FETCH_ASSOC);
+
+								$stmt = $db_con->prepare("SELECT * FROM pelicula WHERE id_metraje=:mid");
+								$stmt->execute(array(":mid"=>$film['id_metraje']));
+								$film_type = $stmt->fetch(PDO::FETCH_ASSOC);
+
+								if($film_type=="") {
+									$stmt = $db_con->prepare("SELECT * FROM serie WHERE id_metraje=:mid");
+									$stmt->execute(array(":mid"=>$film['id_metraje']));
+									$film_type = $stmt->fetch(PDO::FETCH_ASSOC);
+								}
+
+								$date = date_parse($film['fecha']);
+
+							?>
+							<div class="film-detail" id='<?php echo 'lista'.htmlspecialchars($film["id_metraje"]) ?>'>
+								<div class="info-column">
+									<h2><strong><?= $film['nombre'] ?></strong></h2>
+									<div class="calification">
+									<?php for($i = $film["puntuacion"]; $i>0; $i--): ?>
+										<span class="glyphicon glyphicon-star"></span>
+									<?php endfor ?>
+									</div>
+									<strong class="color-grey"><?= $date['year'] ?></strong>&nbsp;
+									<strong class="color-grey"><?= isset($film_type['duracion']) ? $film_type['duracion'] . ' minutos' : '' ?></strong><br><br>
+									<span class="color-grey"><?= $film['descripcion'] ?></span>
+								</div>
+							</div>
+						<?php endforeach?>
+					</div>
 					<?php foreach($result as $r): ?>
 					<?php
 						$stmt = $db_con->prepare("SELECT metraje.* FROM metraje where id_categoria=:cid");
@@ -157,6 +254,9 @@ $list=$stmt->fetchAll();
 										</div>
 										<span><?= $date['year'] ?></span><br>
 										<span><?= $film['descripcion'] ?></span>
+										<div class="chevron-container" id='<?php echo htmlspecialchars($film["id_metraje"]) ?>'>
+											<span class="glyphicon glyphicon-chevron-down movie-chevron"></span>										
+										</div>
 									</div>
 								</div>
 							<?php endforeach?>
